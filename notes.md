@@ -1,0 +1,6 @@
+- Automatic player turns?
+- Quit not working.
+- Card loss mechanics are bugged.
+- Exchange doesn't give all return options.
+- Display not updating after blocking Foreign Aid?
+- Double printing of Block notifications?

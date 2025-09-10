@@ -1,0 +1,198 @@
+2025/09/10 12:47:35 Focused: You
+2025/09/10 12:47:35 Not Focused: Alice
+2025/09/10 12:47:35 Not Focused: Bob
+2025/09/10 12:47:35 pre-buffer: [0]
+2025/09/10 12:47:37 buffer: [55]
+2025/09/10 12:47:37 channel 0
+2025/09/10 12:47:37 menu: 0; {7}; action: Nothing[0m
+2025/09/10 12:47:37 Not Focused: You
+2025/09/10 12:47:37 Focused: Alice
+2025/09/10 12:47:37 Focused: Bob
+2025/09/10 12:47:39 channel 1
+2025/09/10 12:47:39 menu: 2; {1 false}; action: [35mTax[0m
+2025/09/10 12:47:39 Not Focused: You
+2025/09/10 12:47:39 Not Focused: Alice
+2025/09/10 12:47:39 Focused: Bob
+2025/09/10 12:47:40 channel 2
+2025/09/10 12:47:40 menu: 2; {2 false}; action: [35mTax[0m
+2025/09/10 12:47:40 [35mTax[0m
+2025/09/10 12:47:40 Not Focused: You
+2025/09/10 12:47:40 Focused: Alice
+2025/09/10 12:47:40 Not Focused: Bob
+2025/09/10 12:47:42 channel 1
+2025/09/10 12:47:42 menu: 0; {5}; action: Nothing[0m
+2025/09/10 12:47:42 Focused: You
+2025/09/10 12:47:42 Not Focused: Alice
+2025/09/10 12:47:42 Focused: Bob
+2025/09/10 12:47:42 pre-buffer: [0]
+2025/09/10 12:47:45 channel 2
+2025/09/10 12:47:45 menu: 2; {2 false}; action: [32mExchange[0m
+2025/09/10 12:47:45 Focused: You
+2025/09/10 12:47:45 Not Focused: Alice
+2025/09/10 12:47:45 Not Focused: Bob
+2025/09/10 12:47:45 pre-buffer: [0]
+2025/09/10 12:47:51 buffer: [49]
+2025/09/10 12:47:51 channel 0
+2025/09/10 12:47:51 menu: 2; {0 true}; action: [32mExchange[0m
+2025/09/10 12:47:51 Not Focused: You
+2025/09/10 12:47:51 Focused: Alice
+2025/09/10 12:47:51 Not Focused: Bob
+2025/09/10 12:47:54 channel 1
+2025/09/10 12:47:54 menu: 4; {0}; action: [32mExchange[0m
+2025/09/10 12:47:54 [32mExchange[0m
+2025/09/10 12:47:54 Not Focused: You
+2025/09/10 12:47:54 Not Focused: Alice
+2025/09/10 12:47:54 Focused: Bob
+2025/09/10 12:47:57 channel 2
+2025/09/10 12:47:57 menu: 0; {2}; action: Nothing[0m
+2025/09/10 12:47:57 Focused: You
+2025/09/10 12:47:57 Focused: Alice
+2025/09/10 12:47:57 Not Focused: Bob
+2025/09/10 12:47:57 pre-buffer: [0]
+2025/09/10 12:47:58 channel 1
+2025/09/10 12:47:58 menu: 3; {1 0}; action: Foreign Aid[0m
+2025/09/10 12:47:58 Focused: You
+2025/09/10 12:47:58 Not Focused: Alice
+2025/09/10 12:47:58 Not Focused: Bob
+2025/09/10 12:47:58 pre-buffer: [0]
+2025/09/10 12:48:02 buffer: [48]
+2025/09/10 12:48:02 channel 0
+2025/09/10 12:48:02 menu: 3; {0 0}; action: Foreign Aid[0m
+2025/09/10 12:48:02 Foreign Aid[0m
+2025/09/10 12:48:02 Focused: You
+2025/09/10 12:48:02 Not Focused: Alice
+2025/09/10 12:48:02 Not Focused: Bob
+2025/09/10 12:48:02 pre-buffer: [0]
+2025/09/10 12:48:05 buffer: [52]
+2025/09/10 12:48:05 channel 0
+2025/09/10 12:48:05 menu: 0; {4}; action: Nothing[0m
+2025/09/10 12:48:05 Focused: You
+2025/09/10 12:48:05 Not Focused: Alice
+2025/09/10 12:48:05 Not Focused: Bob
+2025/09/10 12:48:05 pre-buffer: [0]
+2025/09/10 12:48:08 buffer: [50]
+2025/09/10 12:48:08 channel 0
+2025/09/10 12:48:08 menu: 1; {2}; action: [37mAssassinate[0m
+2025/09/10 12:48:08 Not Focused: You
+2025/09/10 12:48:08 Focused: Alice
+2025/09/10 12:48:08 Focused: Bob
+2025/09/10 12:48:10 channel 1
+2025/09/10 12:48:10 menu: 2; {1 true}; action: [37mAssassinate[0m
+2025/09/10 12:48:10 Focused: You
+2025/09/10 12:48:10 Not Focused: Alice
+2025/09/10 12:48:10 Not Focused: Bob
+2025/09/10 12:48:10 pre-buffer: [0]
+2025/09/10 12:48:24 buffer: [50]
+2025/09/10 12:48:24 channel 0
+2025/09/10 12:48:24 menu: 4; {1}; action: [37mAssassinate[0m
+2025/09/10 12:48:24 [37mAssassinate[0m
+2025/09/10 12:48:24 Not Focused: You
+2025/09/10 12:48:24 Focused: Alice
+2025/09/10 12:48:24 Not Focused: Bob
+2025/09/10 12:48:25 channel 1
+2025/09/10 12:48:25 menu: 0; {2}; action: Nothing[0m
+2025/09/10 12:48:25 Focused: You
+2025/09/10 12:48:25 Not Focused: Alice
+2025/09/10 12:48:25 Focused: Bob
+2025/09/10 12:48:25 pre-buffer: [0]
+2025/09/10 12:48:27 channel 2
+2025/09/10 12:48:27 menu: 3; {2 0}; action: Foreign Aid[0m
+2025/09/10 12:48:27 Focused: You
+2025/09/10 12:48:27 Not Focused: Alice
+2025/09/10 12:48:27 Not Focused: Bob
+2025/09/10 12:48:27 pre-buffer: [0]
+2025/09/10 12:48:33 buffer: [48]
+2025/09/10 12:48:33 channel 0
+2025/09/10 12:48:33 menu: 3; {0 0}; action: Foreign Aid[0m
+2025/09/10 12:48:33 Foreign Aid[0m
+2025/09/10 12:48:33 Not Focused: You
+2025/09/10 12:48:33 Not Focused: Alice
+2025/09/10 12:48:33 Focused: Bob
+2025/09/10 12:48:35 channel 2
+2025/09/10 12:48:35 menu: 0; {4}; action: Nothing[0m
+2025/09/10 12:48:35 Not Focused: You
+2025/09/10 12:48:35 Not Focused: Alice
+2025/09/10 12:48:35 Focused: Bob
+2025/09/10 12:48:37 channel 2
+2025/09/10 12:48:37 menu: 1; {1}; action: [37mAssassinate[0m
+2025/09/10 12:48:37 Focused: You
+2025/09/10 12:48:37 pre-buffer: [0]
+2025/09/10 12:48:37 Focused: Alice
+2025/09/10 12:48:37 Not Focused: Bob
+2025/09/10 12:48:39 channel 1
+2025/09/10 12:48:39 menu: 2; {1 false}; action: [37mAssassinate[0m
+2025/09/10 12:48:39 Focused: You
+2025/09/10 12:48:39 Not Focused: Alice
+2025/09/10 12:48:39 Not Focused: Bob
+2025/09/10 12:48:39 pre-buffer: [0]
+2025/09/10 12:48:42 buffer: [48]
+2025/09/10 12:48:42 channel 0
+2025/09/10 12:48:42 menu: 2; {0 false}; action: [37mAssassinate[0m
+2025/09/10 12:48:42 Not Focused: You
+2025/09/10 12:48:42 Focused: Alice
+2025/09/10 12:48:42 Not Focused: Bob
+2025/09/10 12:48:44 channel 1
+2025/09/10 12:48:44 menu: 3; {1 0}; action: [37mAssassinate[0m
+2025/09/10 12:48:44 Not Focused: You
+2025/09/10 12:48:44 Focused: Alice
+2025/09/10 12:48:44 Not Focused: Bob
+2025/09/10 12:48:47 channel 1
+2025/09/10 12:48:47 menu: 5; {0}; action: [37mAssassinate[0m
+2025/09/10 12:48:47 [37mAssassinate[0m
+2025/09/10 12:48:47 Focused: You
+2025/09/10 12:48:47 Not Focused: Alice
+2025/09/10 12:48:47 Not Focused: Bob
+2025/09/10 12:48:47 pre-buffer: [0]
+2025/09/10 12:48:59 buffer: [54]
+2025/09/10 12:48:59 channel 0
+2025/09/10 12:48:59 menu: 0; {6}; action: Nothing[0m
+2025/09/10 12:48:59 Focused: You
+2025/09/10 12:48:59 Not Focused: Alice
+2025/09/10 12:48:59 Not Focused: Bob
+2025/09/10 12:48:59 pre-buffer: [0]
+2025/09/10 12:49:01 buffer: [49]
+2025/09/10 12:49:01 channel 0
+2025/09/10 12:49:01 menu: 1; {1}; action: [36mSteal[0m
+2025/09/10 12:49:01 Not Focused: You
+2025/09/10 12:49:01 Not Focused: Alice
+2025/09/10 12:49:01 Focused: Bob
+2025/09/10 12:49:04 channel 2
+2025/09/10 12:49:04 menu: 2; {2 false}; action: [36mSteal[0m
+2025/09/10 12:49:04 Not Focused: You
+2025/09/10 12:49:04 Focused: Alice
+2025/09/10 12:49:04 Not Focused: Bob
+2025/09/10 12:49:05 channel 1
+2025/09/10 12:49:05 menu: 3; {1 0}; action: [36mSteal[0m
+2025/09/10 12:49:05 [36mSteal[0m
+2025/09/10 12:49:05 Not Focused: You
+2025/09/10 12:49:05 Not Focused: Alice
+2025/09/10 12:49:05 Focused: Bob
+2025/09/10 12:49:08 channel 2
+2025/09/10 12:49:08 menu: 0; {2}; action: Nothing[0m
+2025/09/10 12:49:08 Focused: You
+2025/09/10 12:49:08 Not Focused: Alice
+2025/09/10 12:49:08 Not Focused: Bob
+2025/09/10 12:49:08 pre-buffer: [0]
+2025/09/10 12:49:19 buffer: [48]
+2025/09/10 12:49:19 channel 0
+2025/09/10 12:49:19 menu: 3; {0 0}; action: Foreign Aid[0m
+2025/09/10 12:49:19 Foreign Aid[0m
+2025/09/10 12:49:19 Focused: You
+2025/09/10 12:49:19 Not Focused: Alice
+2025/09/10 12:49:19 Not Focused: Bob
+2025/09/10 12:49:19 pre-buffer: [0]
+2025/09/10 12:49:22 buffer: [51]
+2025/09/10 12:49:22 channel 0
+2025/09/10 12:49:22 menu: 0; {3}; action: Nothing[0m
+2025/09/10 12:49:22 Focused: You
+2025/09/10 12:49:22 Not Focused: Alice
+2025/09/10 12:49:22 Not Focused: Bob
+2025/09/10 12:49:22 pre-buffer: [0]
+2025/09/10 12:49:24 buffer: [50]
+2025/09/10 12:49:24 pre-buffer: [50]
+2025/09/10 12:49:27 buffer: [49]
+2025/09/10 12:49:27 channel 0
+2025/09/10 12:49:27 menu: 1; {1}; action: Coup[0m
+2025/09/10 12:49:27 Not Focused: You
+2025/09/10 12:49:27 Focused: Alice
+2025/09/10 12:49:27 Not Focused: Bob
