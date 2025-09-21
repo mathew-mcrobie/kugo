@@ -8,6 +8,10 @@ import (
 	"slices"
 )
 
+// Treat this value as a constant. Go does not allow arrays to be constant but
+// This should be considered one regardless.
+var BOT_NAMES = [5]string{"Alice", "Bob", "Charlie", "Diana", "Elsie"}
+
 var(
 	logFile, _ = os.Create("debug.log")
 	debug = log.New(logFile, "[DEBUG]", log.Lshortfile)
@@ -87,6 +91,7 @@ var handlers = map[State]stateHandler{
 	State{Phase: ExchangeMiddle, Action: Exchange}:     (*Controller).exchangeMiddle,
 	State{Phase: ExchangeFinal, Action: Exchange}:      (*Controller).exchangeFinal,
 	State{Phase: EndGame, Action: NoAction}:			(*Controller).endGame,
+	State{Phase: MainMenu, Action: NoAction}:			(*Controller).mainMenu,
 }
 
 type Controller struct {
@@ -94,6 +99,7 @@ type Controller struct {
 	rng           *rand.Rand
 	deck          []Card
 	actionLog     *ActionLog
+	TotalPlayers  int
 	AllPlayers    []*Player
 	activePlayers []*Player
 	current       *Player
@@ -175,7 +181,7 @@ func (c *Controller) GetStateData() *StateData {
 	if c.Phase == SelectTarget {
 		validTargets = c.getValidTargets()
 	}
-	data := NewStateData(c.activePlayers, validTargets, c.blockType, c.State)
+	data := NewStateData(c, validTargets)
 	return data
 }
 
@@ -217,6 +223,13 @@ func (c *Controller) setActivePlayers() {
 		if c.Action == Exchange {
 			c.activePlayers = []*Player{c.current}
 			return
+		}
+	case MainMenu, EndGame:
+		for _, p := range c.AllPlayers {
+			if !p.IsLocal {
+				continue
+			}
+			c.activePlayers = append(c.activePlayers, p)
 		}
 	}
 }
@@ -265,6 +278,8 @@ func (c *Controller) UpdateGame(data *InputData) {
 	gameContinues, _ := c.checkForGameEnd()
 	if !gameContinues {
 		c.State = State{EndGame, NoAction}
+		c.setActivePlayers()
+		return
 	}
 	c.selection = data.Selection
 	c.playerIndex = data.PlayerIndex
@@ -309,6 +324,14 @@ func (c *Controller) advanceTurn() State {
 	c.selection = 0
 	c.playerIndex = 0
 	return State{Phase: SelectAction, Action: NoAction}
+}
+
+func (c *Controller) mainMenu(sel, pIdx int) State {
+	if sel != 200 {
+		c.TotalPlayers = sel
+		return c.State
+	}
+	return State{SelectAction, NoAction}
 }
 
 func (c *Controller) selectAction(sel, pIdx int) State {
@@ -399,42 +422,42 @@ func (c *Controller) challengeReveal(sel, pIdx int) State {
 	case Assassinate:
 		if revealedCard == Assassin {
 			c.actionLog.Enqueue(toLogFail)
-			c.swapCard(pIdx, sel)
+			c.swapCard(c.current.Index, sel)
 			c.actionLog.Enqueue(fmt.Sprintf("%s must lose influence", c.challenger))
 			return State{Phase: ChallengeLoss, Action: c.Action}
 		}
 		c.actionLog.Enqueue(toLogSucceed)
-		c.loseCard(pIdx, sel)
+		c.loseCard(c.current.Index, sel)
 		return c.advanceTurn()
 	case Exchange:
 		if revealedCard == Ambassador {
 			c.actionLog.Enqueue(toLogFail)
-			c.swapCard(pIdx, sel)
+			c.swapCard(c.current.Index, sel)
 			c.actionLog.Enqueue(fmt.Sprintf("%s must lose influence", c.challenger))
 			return State{Phase: ChallengeLoss, Action: c.Action}
 		}
 		c.actionLog.Enqueue(toLogSucceed)
-		c.loseCard(pIdx, sel)
+		c.loseCard(c.current.Index, sel)
 		return c.advanceTurn()
 	case Steal:
 		if revealedCard == Captain {
 			c.actionLog.Enqueue(toLogFail)
-			c.swapCard(pIdx, sel)
+			c.swapCard(c.current.Index, sel)
 			c.actionLog.Enqueue(fmt.Sprintf("%s must lose influence", c.challenger))
 			return State{Phase: ChallengeLoss, Action: c.Action}
 		}
 		c.actionLog.Enqueue(toLogSucceed)
-		c.loseCard(pIdx, sel)
+		c.loseCard(c.current.Index, sel)
 		return c.advanceTurn()
 	case Tax:
 		if revealedCard == Duke {
 			c.actionLog.Enqueue(toLogFail)
-			c.swapCard(pIdx, sel)
+			c.swapCard(c.current.Index, sel)
 			c.actionLog.Enqueue(fmt.Sprintf("%s must lose influence", c.challenger))
 			return State{Phase: ChallengeLoss, Action: c.Action}
 		}
 		c.actionLog.Enqueue(toLogSucceed)
-		c.loseCard(pIdx, sel)
+		c.loseCard(c.current.Index, sel)
 		return c.advanceTurn()
 	default:
 		panic("Unreachable code! (*Controller.challengeReveal)")
@@ -515,7 +538,7 @@ func (c *Controller) blockReveal(sel, pIdx int) State {
 			c.blocker,
 			revealedCard,
 		))
-		c.swapCard(pIdx, sel)
+		c.swapCard(c.blocker.Index, sel)
 		c.actionLog.Enqueue(fmt.Sprintf("%s must lose influence", c.challenger))
 		return State{Phase: BlockLoss, Action: c.Action}
 	}
@@ -553,10 +576,12 @@ func (c *Controller) resolveAction(sel, pIdx int) State {
 		lost := c.target.CardsLost[totalLost-1]
 		c.actionLog.Enqueue(fmt.Sprintf("%s loses %s", c.target, lost))
 	case Assassinate:
-		c.loseCard(pIdx, sel)
-		totalLost := len(c.target.CardsLost)
-		lost := c.target.CardsLost[totalLost-1]
-		c.actionLog.Enqueue(fmt.Sprintf("%s loses %s", c.target, lost))
+		if c.target.IsAlive() {
+			c.loseCard(pIdx, sel)
+			totalLost := len(c.target.CardsLost)
+			lost := c.target.CardsLost[totalLost-1]
+			c.actionLog.Enqueue(fmt.Sprintf("%s loses %s", c.target, lost))
+		}
 	case Exchange:
 		// Need to draw the cards before getting input, so just draw them and
 		// move to the next phase for card selection

@@ -33,17 +33,18 @@ type InputHandler struct {
 	allPlayers	  []*game.Player
 	activePlayers []*game.Player
 	validTargets  []*game.Player
+	target		  *game.Player
 	blockType     game.Card
-	PlayerChans   []chan rune
+	PlayerChans   [6]chan rune
 	chanErr       chan error
 	inputData     *game.InputData
 }
 
 // NewInputHandler is called during initialization to set up the InputHandler.
 func NewInputHandler(players []*game.Player, chanErr chan error) *InputHandler {
-	var PlayerChans []chan rune
-	for range len(players) {
-		PlayerChans = append(PlayerChans, make(chan rune))
+	var PlayerChans [6]chan rune
+	for i := range len(players) {
+		PlayerChans[i] = make(chan rune)
 	}
 	rng := rand.New(rand.NewPCG(rand.Uint64(), rand.Uint64()))
 	ih := InputHandler{
@@ -58,6 +59,7 @@ func NewInputHandler(players []*game.Player, chanErr chan error) *InputHandler {
 func (ih *InputHandler) UpdateStateData(data *game.StateData) {
 	ih.activePlayers = data.ActivePlayers
 	ih.validTargets = data.ValidTargets
+	ih.target = data.Target
 	ih.blockType = data.BlockType
 	ih.phase = data.State.Phase
 	ih.action = data.State.Action
@@ -112,20 +114,18 @@ func (ih *InputHandler) getSignal(minVal, maxVal int) (int, int) {
 			if ih.checkIfActive(2) && ih.checkSignal(runeIn, minVal, maxVal) {
 				return int(runeIn - '0'), 2
 			}
-			/*
-				case runeIn := <-ih.PlayerChans[3]:
-					if ih.checkIfActive(3) && ih.checkSignal(runeIn, minVal, maxVal) {
-						return int(runeIn - '0'), 3
-					}
-				case runeIn := <-ih.PlayerChans[4]:
-					if ih.checkIfActive(4) && ih.checkSignal(runeIn, minVal, maxVal) {
-						return int(runeIn - '0'), 4
-					}
-				case runeIn := <-ih.PlayerChans[5]:
-					if ih.checkIfActive(4) && ih.checkSignal(runeIn, minVal, maxVal) {
-						return int(runeIn - '0'), 4
-					}
-			*/
+		case runeIn := <-ih.PlayerChans[3]:
+			if ih.checkIfActive(3) && ih.checkSignal(runeIn, minVal, maxVal) {
+				return int(runeIn - '0'), 3
+			}
+		case runeIn := <-ih.PlayerChans[4]:
+			if ih.checkIfActive(4) && ih.checkSignal(runeIn, minVal, maxVal) {
+				return int(runeIn - '0'), 4
+			}
+		case runeIn := <-ih.PlayerChans[5]:
+			if ih.checkIfActive(5) && ih.checkSignal(runeIn, minVal, maxVal) {
+				return int(runeIn - '0'), 5
+			}
 		}
 	}
 }
@@ -244,7 +244,10 @@ func (ih *InputHandler) resolveAction() *game.InputData {
 	// needs punting to ExchangeMiddle, which is the same as just passing.
 	switch ih.action {
 	case game.Assassinate, game.Coup:
-		return ih.selectCard()
+		if ih.target.IsAlive() {
+			return ih.selectCard()
+		}
+		return game.NewInputData(0, 0)
 	default:
 		ih.flagAsResponded(0)
 		return game.NewInputData(0, 0)
@@ -401,16 +404,16 @@ func (ih *InputHandler) CreateBotInputStream(ctx context.Context, outChan chan<-
 			n = ih.rng.IntN(len(hand)) + 1
 			// Replace n if they have the correct card
 			if ih.action == game.Assassinate && slices.Contains(hand, game.Contessa) {
-				n = slices.Index(hand, game.Contessa)
+				n = slices.Index(hand, game.Contessa) + 1
 			}
 			if ih.action == game.ForeignAid && slices.Contains(hand, game.Duke) {
-				n = slices.Index(hand, game.Duke)
+				n = slices.Index(hand, game.Duke) + 1
 			}
 			if ih.blockType == game.Ambassador && slices.Contains(hand, game.Ambassador) {
-				n = slices.Index(hand, game.Ambassador)
+				n = slices.Index(hand, game.Ambassador) + 1
 			}
 			if ih.blockType == game.Captain && slices.Contains(hand, game.Captain) {
-				n = slices.Index(hand, game.Captain)
+				n = slices.Index(hand, game.Captain) + 1
 			}
 			outChan <- rune(n + '0')
 		case game.ChallengeLoss, game.BlockLoss:

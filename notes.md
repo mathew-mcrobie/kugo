@@ -1,3 +1,4 @@
+## Bugs
 - Automatic player turns?
 - Quit not working.
 - Card loss mechanics are bugged.
@@ -34,4 +35,3 @@
 - displays unmarshall serialised data and render to screen
 
 ## Actor Model architecture!
->>>>>>> dev

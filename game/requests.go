@@ -15,16 +15,18 @@ func NewInputData(sel, pIdx int) *InputData {
 
 type StateData struct {
 	ActivePlayers, ValidTargets []*Player
+	Target						*Player
 	BlockType                   Card
 	State                       State
 }
 
-func NewStateData(active, valid []*Player, block Card, state State) *StateData {
+func NewStateData(c *Controller, valid []*Player) *StateData {
 	data := StateData{
-		ActivePlayers: active,
+		ActivePlayers: c.activePlayers,
 		ValidTargets:  valid,
-		BlockType:     block,
-		State:         state,
+		Target:		   c.target,
+		BlockType:     c.blockType,
+		State:         c.State,
 	}
 	return &data
 }
@@ -36,6 +38,7 @@ type DisplayData struct {
 	Current       *Player
 	ActionLog     *ActionLog
 	State         State
+	Selection	  int
 }
 
 func (c *Controller) NewDisplayData(validTargets []*Player) *DisplayData {
@@ -46,6 +49,7 @@ func (c *Controller) NewDisplayData(validTargets []*Player) *DisplayData {
 		Current:       c.current,
 		ActionLog:     c.actionLog,
 		State:         c.State,
+		Selection:	   c.selection,
 	}
 	return &data
 }

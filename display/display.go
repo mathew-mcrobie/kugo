@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"golang.org/x/term"
@@ -63,20 +64,36 @@ type Display struct {
 	current       *game.Player
 	victor        *game.Player
 	actionLog     *game.ActionLog
-	state         game.State
+	State         game.State
 	clock         *time.Ticker
 	row           int
 	chanErr       chan error
+	builder		  *strings.Builder
+	Selection	  int
 }
 
 func NewDisplay(chanErr chan error) *Display {
-	var fps float64 = 1000.0 / 30
-	return &Display{clock: time.NewTicker(time.Duration(fps) * time.Millisecond), chanErr: chanErr}
+	var fps float64 = 1000.0 / 24
+	builder := new(strings.Builder)
+	return &Display{clock: time.NewTicker(time.Duration(fps) * time.Millisecond), chanErr: chanErr, builder: builder}
+}
+
+func (d *Display) buildString(row, col int, str string) {
+	outStr := fmt.Sprintf("\033[%d;%dH%s", row, col, str)
+	_, err := d.builder.WriteString(outStr)
+	if err != nil {
+		d.chanErr <- err
+	}
+}
+
+func (d *Display) Blit() {
+	fmt.Print(d.builder.String())
 }
 
 // Draw Functions
 func (d *Display) resetScreen() {
-	fmt.Print("\033[2J\033[1;1H")
+	d.builder.Reset()
+	d.builder.WriteString("\033[2J\033[1;1H")
 	d.row = 1
 }
 
@@ -87,28 +104,41 @@ func (d *Display) checkAudience() bool {
 		}
 		return true
 	}
-	AddStr(d.row, 5, "Biding your time...")
+	d.buildString(d.row, 5, "Biding your time...")
 	d.row++
 	return false
+}
+
+func (d *Display) DrawMenuScreen(selection int) {
+	d.resetScreen()
+	d.drawHeader()
+	d.Selection = selection
+	d.State = game.State{game.MainMenu, game.NoAction}
+	d.DrawMainMenu()
+	d.Blit()
 }
 
 func (d *Display) DrawDisplay(ctx context.Context) {
 	defer d.RecoverPanic()
 	for {
-		if d.state.Phase == game.EndGame {
-			break
+		switch d.State.Phase {
+		case game.EndGame:
+			d.resetScreen()
+			d.drawHeader()
+			d.drawVictoryScreen()
+			d.Blit()
+			<-d.clock.C
+		default:
+			d.resetScreen()
+			d.drawHeader()
+			d.drawPlayers()
+			d.drawActionLog()
+			d.drawLocalHand()
+			d.drawMenu()
+			d.Blit()
+			<-d.clock.C
 		}
-		d.resetScreen()
-		d.drawHeader()
-		d.drawPlayers()
-		d.drawActionLog()
-		d.drawLocalHand()
-		d.drawMenu()
-		<-d.clock.C
 	}
-	d.resetScreen()
-	d.drawHeader()
-	d.drawVictoryScreen()
 }
 
 func (d *Display) UpdateDisplay(info *game.DisplayData) {
@@ -117,8 +147,9 @@ func (d *Display) UpdateDisplay(info *game.DisplayData) {
 	d.validTargets = info.ValidTargets
 	d.current = info.Current
 	d.actionLog = info.ActionLog
-	d.state = info.State
-	if d.state.Phase != game.EndGame {
+	d.State = info.State
+	d.Selection = info.Selection
+	if d.State.Phase != game.EndGame {
 		return
 	}
 	for _, p := range d.allPlayers {
@@ -130,14 +161,14 @@ func (d *Display) UpdateDisplay(info *game.DisplayData) {
 }
 
 func (d *Display) drawHeader() {
-	AddStr(d.row, 16, "=== KUGO ===")
+	d.buildString(d.row, 16, "=== KUGO ===")
 	d.row += 2
 }
 
 func (d *Display) drawPlayers() {
-	coinString := "\033[31m~DEAD~\033[0m"
 	for _, player := range d.allPlayers {
 		marker := "    "
+		coinString := "\033[31m~ELIMINATED~\033[0m"
 		currentIdx := d.current.Index
 		if player.Index == currentIdx {
 			marker = ">>> "
@@ -147,7 +178,7 @@ func (d *Display) drawPlayers() {
 			coinString = fmt.Sprintf("%2d", player.Coins)
 		}
 		playerString := fmt.Sprintf("%s%-12s%s      %s", marker, player.Name, coinString, handString)
-		AddStr(d.row, 1, playerString)
+		d.buildString(d.row, 1, playerString)
 		d.row++
 	}
 	d.row++
@@ -158,7 +189,7 @@ func (d *Display) drawActionLog() {
 		return
 	}
 	for _, msg := range d.actionLog.Items {
-		AddStr(d.row, 1, msg)
+		d.buildString(d.row, 1, msg)
 		d.row++
 	}
 	d.row++
@@ -195,7 +226,7 @@ func (d *Display) drawLocalHand() {
 				p.CardsHeld[3],
 			)
 		}
-		AddStr(d.row, 5, pHand)
+		d.buildString(d.row, 5, pHand)
 		d.row += 2
 		return
 	}
@@ -215,7 +246,7 @@ func (d *Display) drawMenu() {
 	if !d.checkAudience() {
 		return
 	}
-	switch d.state.Phase {
+	switch d.State.Phase {
 	case game.SelectAction:
 		d.drawActionMenu()
 	case game.SelectTarget:
@@ -229,7 +260,7 @@ func (d *Display) drawMenu() {
 	case game.ChallengeLoss, game.BlockLoss:
 		d.drawLossMenu()
 	case game.ResolveAction:
-		if d.state.Action == game.Assassinate || d.state.Action == game.Coup {
+		if d.State.Action == game.Assassinate || d.State.Action == game.Coup {
 			d.drawLossMenu()
 			return
 		}
@@ -243,98 +274,97 @@ func (d *Display) drawMenu() {
 }
 
 func (d *Display) drawActionMenu() {
-	AddStr(d.row, 5, "[1] Income (+1 coin)")
+	d.buildString(d.row, 5, "[1] Income (+1 coin)")
 	d.row++
-	AddStr(d.row, 5, fmt.Sprintf("[2] Foreign Aid (+2 coins; blocked by %s)", game.Duke))
+	d.buildString(d.row, 5, fmt.Sprintf("[2] Foreign Aid (+2 coins; blocked by %s)", game.Duke))
 	d.row++
-	AddStr(d.row, 5, "[3] Coup (-7 coins; target loses influence)")
+	d.buildString(d.row, 5, "[3] Coup (-7 coins; target loses influence)")
 	d.row++
-	AddStr(d.row, 5, fmt.Sprintf("\033[37m[4] Assassinate (-3 coins; target loses influences; blocked by %s)", game.Contessa))
+	d.buildString(d.row, 5, fmt.Sprintf("\033[37m[4] Assassinate (-3 coins; target loses influences; blocked by %s)", game.Contessa))
 	d.row++
-	AddStr(d.row, 5, fmt.Sprintf("\033[32m[5] Exchange (Draw 2 cards, then return 2 cards)\033[0m"))
+	d.buildString(d.row, 5, fmt.Sprintf("\033[32m[5] Exchange (Draw 2 cards, then return 2 cards)\033[0m"))
 	d.row++
-	AddStr(d.row, 5, fmt.Sprintf("\033[36m[6] Steal (Take up to 2 coins from target; blocked by %s \033[36mor %s)", game.Ambassador, game.Captain))
+	d.buildString(d.row, 5, fmt.Sprintf("\033[36m[6] Steal (Take up to 2 coins from target; blocked by %s \033[36mor %s)", game.Ambassador, game.Captain))
 	d.row++
-	AddStr(d.row, 5, "\033[35m[7] Tax (+3 coins)\033[0m")
+	d.buildString(d.row, 5, "\033[35m[7] Tax (+3 coins)\033[0m")
 	d.row += 2
-	AddStr(d.row, 1, "The time has come to act:")
+	d.buildString(d.row, 1, "The time has come to act:")
 	d.row++
 }
 
 func (d *Display) drawTargetMenu() {
-	AddStr(d.row, 5, "And you will act upon?")
+	d.buildString(d.row, 5, "And you will act upon?")
 	d.row++
 	var counter int
 	for _, p := range d.validTargets {
 		counter++
-		AddStr(d.row, 5, fmt.Sprintf("[%d] %s", counter, p.Name))
+		d.buildString(d.row, 5, fmt.Sprintf("[%d] %s", counter, p.Name))
 		d.row++
 	}
 }
 
 func (d *Display) drawChallengeMenu() { // Saved for later: pInfo []*Player) {
-	AddStr(d.row, 5, "Are they bluffing?")
 	d.row++
-	AddStr(d.row, 5, "[1] Challenge")
+	d.buildString(d.row, 5, "[1] Challenge")
 	d.row++
-	AddStr(d.row, 5, "[0] Pass")
+	d.buildString(d.row, 5, "[0] Pass")
 	d.row++
 }
 
 func (d *Display) drawBlockMenu() { // Saved for later: pInfo []*Player) {}
-	AddStr(d.row, 5, "Will you block?")
+	d.buildString(d.row, 5, "Will you block?")
 	d.row++
-	if d.state.Action != game.Steal {
-		AddStr(d.row, 5, "[1] Block")
+	if d.State.Action != game.Steal {
+		d.buildString(d.row, 5, "[1] Block")
 		d.row++
 	} else {
-		AddStr(d.row, 5, fmt.Sprintf("[1] Block with %s", game.Ambassador))
+		d.buildString(d.row, 5, fmt.Sprintf("[1] Block with %s", game.Ambassador))
 		d.row++
-		AddStr(d.row, 5, fmt.Sprintf("[2] Block with %s", game.Captain))
+		d.buildString(d.row, 5, fmt.Sprintf("[2] Block with %s", game.Captain))
 		d.row++
 	}
-	AddStr(d.row, 5, "[0] Pass")
+	d.buildString(d.row, 5, "[0] Pass")
 	d.row++
 }
 
 func (d *Display) drawRevealMenu() {
-	AddStr(d.row, 5, "Show the world the truth. Reveal a card:")
+	d.buildString(d.row, 5, "Show the world the truth. Reveal a card:")
 	d.row++
 	for i, card := range d.activePlayers[0].CardsHeld {
-		AddStr(d.row, 5, fmt.Sprintf("[%d] Reveal %s", i+1, card))
+		d.buildString(d.row, 5, fmt.Sprintf("[%d] Reveal %s", i+1, card))
 		d.row++
 	}
 }
 
 func (d *Display) drawLossMenu() {
-	AddStr(d.row, 5, "Who has disappointed you? Choose a card to lose:")
+	d.buildString(d.row, 5, "Who has disappointed you? Choose a card to lose:")
 	d.row++
 	for i, card := range d.activePlayers[0].CardsHeld {
-		AddStr(d.row, 5, fmt.Sprintf("[%d] Lose %s", i+1, card))
+		d.buildString(d.row, 5, fmt.Sprintf("[%d] Lose %s", i+1, card))
 		d.row++
 	}
 }
 
 func (d *Display) drawReturnTwo() {
-	AddStr(d.row, 5, "Who do you no longer need? (Returned 0 of 2)")
+	d.buildString(d.row, 5, "Who do you no longer need? (Returned 0 of 2)")
 	d.row++
 	for i, card := range d.activePlayers[0].CardsHeld {
-		AddStr(d.row, 5, fmt.Sprintf("[%d] Return %s", i+1, card))
+		d.buildString(d.row, 5, fmt.Sprintf("[%d] Return %s", i+1, card))
 		d.row++
 	}
 }
 
 func (d *Display) drawReturnOne() {
-	AddStr(d.row, 5, "Who do you no longer need? (Returned 1 of 2)")
+	d.buildString(d.row, 5, "Who do you no longer need? (Returned 1 of 2)")
 	d.row++
 	for i, card := range d.activePlayers[0].CardsHeld {
-		AddStr(d.row, 5, fmt.Sprintf("[%d] Return %s", i+1, card))
+		d.buildString(d.row, 5, fmt.Sprintf("[%d] Return %s", i+1, card))
 		d.row++
 	}
-	AddStr(d.row, 5, fmt.Sprint("[0] Cancel"))
+	d.buildString(d.row, 5, fmt.Sprint("[0] Cancel"))
 	d.row++
 }
 
 func (d *Display) drawVictoryScreen() {
-	AddStr(d.row, 0, fmt.Sprintf("The game is over, and %s is the victor!", d.victor))
+	d.buildString(d.row, 0, fmt.Sprintf("The game is over, and %s is the victor!", d.victor))
 }

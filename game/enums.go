@@ -53,7 +53,8 @@ func (a Action) Card() Card {
 type Phase int
 
 const (
-	SelectAction Phase = iota
+	MainMenu	 Phase = iota
+	SelectAction
 	SelectTarget
 	MakeChallenge
 	ChallengeReveal
@@ -69,6 +70,7 @@ const (
 )
 
 var phaseName = map[Phase]string{
+	MainMenu:			"MainMenu",
 	SelectAction: 		"SelectAction",
 	SelectTarget: 		"SelectTarget",
 	MakeChallenge: 		"MakeChallenge",
