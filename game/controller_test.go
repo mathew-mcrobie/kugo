@@ -43,7 +43,7 @@ func setupTestController() *Controller {
 	}
 	newCon := NewController(players)
 	for j := 3; j > 1; j-- {
-		for i, p := range newCon.allPlayers {
+		for i, p := range newCon.AllPlayers {
 			p.CardsHeld = append(p.CardsHeld, newCon.deck[i*j])
 		}
 		for _, k := range [5]int{4, 3, 2, 1, 0} {
@@ -131,7 +131,7 @@ func TestShuffleAndDeal(t *testing.T) {
 		t.Errorf("%v should be shuffled.", newCon.deck)
 	}
 	assertEqual[int](t, len(newCon.deck), 5, "test deck length")
-	for i, p := range newCon.allPlayers {
+	for i, p := range newCon.AllPlayers {
 		assertEqual[int](t, len(p.CardsHeld), 2, fmt.Sprintf("test hands %d", i))
 	}
 }
@@ -180,7 +180,7 @@ func TestUpdateSelectTarget(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = State{SelectTarget, tt.action}
-			testCon.allPlayers[0].Coins += 6
+			testCon.AllPlayers[0].Coins += 6
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertNotNil(t, testCon.target, testName)
@@ -201,7 +201,7 @@ func TestSelectTargetCancel(t *testing.T) {
 	testCon := setupTestController()
 	testCon.State = State{SelectTarget, Assassinate}
 	inputData := NewInputData(0, 0)
-	testCon.allPlayers[0].Coins += 6
+	testCon.AllPlayers[0].Coins += 6
 	testCon.UpdateGame(inputData)
 	if testCon.target != nil {
 		t.Errorf("got %s; want nil", testCon.target)
@@ -230,8 +230,8 @@ func TestUpdateChallengeReveal(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = tt.state
-			testCon.current = testCon.allPlayers[tt.pIdx]
-			testCon.challenger = testCon.allPlayers[tt.challenger]
+			testCon.current = testCon.AllPlayers[tt.pIdx]
+			testCon.challenger = testCon.AllPlayers[tt.challenger]
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertEqual[State](t, testCon.State, tt.want, testName)
@@ -261,7 +261,7 @@ func TestUpdateChallengeLoss(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = tt.state
-			testCon.challenger = testCon.allPlayers[tt.pIdx]
+			testCon.challenger = testCon.AllPlayers[tt.pIdx]
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertEqual[State](t, testCon.State, tt.want, testName)
@@ -291,9 +291,9 @@ func TestUpdateBlockReveal(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = tt.state
-			testCon.blocker = testCon.allPlayers[tt.pIdx]
+			testCon.blocker = testCon.AllPlayers[tt.pIdx]
 			testCon.blockType = tt.blockType
-			testCon.challenger = testCon.allPlayers[tt.challenger]
+			testCon.challenger = testCon.AllPlayers[tt.challenger]
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertEqual[State](t, testCon.State, tt.want, testName)
@@ -321,7 +321,7 @@ func TestUpdateBlockLoss(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = tt.state
-			testCon.challenger = testCon.allPlayers[tt.pIdx]
+			testCon.challenger = testCon.AllPlayers[tt.pIdx]
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertEqual[State](t, testCon.State, tt.want, testName)
@@ -333,10 +333,10 @@ func TestUpdateBlockLoss(t *testing.T) {
 func TestUpdateResolveAssassinate(t *testing.T) {
 	testCon := setupTestController()
 	testCon.State = State{ResolveAction, Assassinate}
-	testCon.target = testCon.allPlayers[2]
+	testCon.target = testCon.AllPlayers[2]
 	inputData := NewInputData(1, 2)
 	testCon.UpdateGame(inputData)
-	prevTarget := testCon.allPlayers[2]
+	prevTarget := testCon.AllPlayers[2]
 	testState := State{SelectAction, NoAction}
 	assertEqual[State](t, testCon.State, testState, "Resolve Assassinate")
 	assertEqual[int](t, len(prevTarget.CardsHeld), 1, "Resolve Assassinate")
@@ -345,9 +345,9 @@ func TestUpdateResolveAssassinate(t *testing.T) {
 func TestUpdateResolveCoup(t *testing.T) {
 	testCon := setupTestController()
 	testCon.State = State{ResolveAction, Coup}
-	testCon.target = testCon.allPlayers[2]
+	testCon.target = testCon.AllPlayers[2]
 	inputData := NewInputData(1, 2)
-	prevTarget := testCon.allPlayers[2]
+	prevTarget := testCon.AllPlayers[2]
 	testCon.UpdateGame(inputData)
 	testState := State{SelectAction, NoAction}
 	assertEqual[State](t, testCon.State, testState, "Resolve Coup")
@@ -370,12 +370,12 @@ func TestUpdateResolveAction(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
 			testCon.State = tt.state
-			testCon.current = testCon.allPlayers[tt.current]
-			testCon.target = testCon.allPlayers[tt.target]
+			testCon.current = testCon.AllPlayers[tt.current]
+			testCon.target = testCon.AllPlayers[tt.target]
 			inputData := NewInputData(0, 0)
 			testCon.UpdateGame(inputData)
-			prevPlayer := testCon.allPlayers[tt.current]
-			prevTarget := testCon.allPlayers[tt.target]
+			prevPlayer := testCon.AllPlayers[tt.current]
+			prevTarget := testCon.AllPlayers[tt.target]
 			initState := State{SelectAction, NoAction}
 			assertEqual[State](t, testCon.State, initState, testName)
 			assertEqual[int](t, prevPlayer.Coins, tt.wantCoins, testName)
@@ -401,7 +401,7 @@ func TestGameUpdateMakeChallenge(t *testing.T) {
 		testName := fmt.Sprintf("test %s happy challenge", tt.action)
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
-			testCon.allPlayers[0].Coins += 6
+			testCon.AllPlayers[0].Coins += 6
 			testCon.State = State{MakeChallenge, tt.action}
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
@@ -438,7 +438,7 @@ func TestUpdateGameMakeChallengePass(t *testing.T) {
 				t.Errorf("%s: erroneous challenger found (%s)", testName, testCon.challenger)
 			}
 			assertEqual[Phase](t, testCon.Phase, tt.want, testName)
-			if testCon.Action == Assassinate && testCon.allPlayers[0].Coins != 8 {
+			if testCon.Action == Assassinate && testCon.AllPlayers[0].Coins != 8 {
 				t.Errorf("%s: got %d; want %d", testName, testCon.current.Coins, 8)
 			}
 		})
@@ -574,10 +574,10 @@ func TestUpdateGameExchangeResolve(t *testing.T) {
 		testName := fmt.Sprintf("Test Exchange resolution %d", i)
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
-			testCon.current = testCon.allPlayers[tt.pIdx]
-			testCon.allPlayers[0].CardsHeld = append(testCon.allPlayers[0].CardsHeld, testCon.deck[:2]...)
+			testCon.current = testCon.AllPlayers[tt.pIdx]
+			testCon.AllPlayers[0].CardsHeld = append(testCon.AllPlayers[0].CardsHeld, testCon.deck[:2]...)
 			testCon.deck = testCon.deck[2:]
-			testCon.allPlayers[1].CardsHeld = append(testCon.allPlayers[1].CardsHeld, testCon.deck[0])
+			testCon.AllPlayers[1].CardsHeld = append(testCon.AllPlayers[1].CardsHeld, testCon.deck[0])
 			testCon.deck = testCon.deck[1:]
 			testCon.loseCard(3, 1)
 			testCon.State = tt.state
@@ -602,15 +602,15 @@ func TestUpdateGameExchangeFinalCommit(t *testing.T) {
 		testName := fmt.Sprintf("Test Exchange final commit %d", i)
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
-			testCon.current = testCon.allPlayers[tt.pIdx]
-			testCon.allPlayers[0].CardsHeld = append(testCon.allPlayers[0].CardsHeld, testCon.deck[0])
+			testCon.current = testCon.AllPlayers[tt.pIdx]
+			testCon.AllPlayers[0].CardsHeld = append(testCon.AllPlayers[0].CardsHeld, testCon.deck[0])
 			testCon.returnedCards = append(testCon.returnedCards, testCon.deck[1])
 			testCon.deck = testCon.deck[2:]
 			testCon.State = tt.state
 			inputData := NewInputData(tt.sel, tt.pIdx)
 			testCon.UpdateGame(inputData)
 			assertEqual[State](t, testCon.State, tt.wantState, testName)
-			assertEqual[int](t, len(testCon.allPlayers[tt.pIdx].CardsHeld), tt.wantCards, testName)
+			assertEqual[int](t, len(testCon.AllPlayers[tt.pIdx].CardsHeld), tt.wantCards, testName)
 			assertEqual[int](t, len(testCon.returnedCards), 0, testName)
 		})
 	}
@@ -629,9 +629,9 @@ func TestUpdateExchangeFinalCancel(t *testing.T) {
 		testName := fmt.Sprintf("Test Exchange final cancel %d", i)
 		t.Run(testName, func(t *testing.T) {
 			testCon := setupTestController()
-			testCon.current = testCon.allPlayers[tt.pIdx]
+			testCon.current = testCon.AllPlayers[tt.pIdx]
 			testCon.returnedCards = append(testCon.returnedCards, testCon.deck[0])
-			testCon.allPlayers[2].CardsHeld = append(testCon.allPlayers[2].CardsHeld, testCon.deck[1])
+			testCon.AllPlayers[2].CardsHeld = append(testCon.AllPlayers[2].CardsHeld, testCon.deck[1])
 			testCon.deck = testCon.deck[2:]
 			testCon.State = tt.state
 			inputData := NewInputData(tt.sel, tt.pIdx)

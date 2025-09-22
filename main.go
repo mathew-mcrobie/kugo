@@ -6,12 +6,53 @@ import (
 	"os"
 	"time"
 
+
 	dis "kugo/display"
 	"kugo/game"
 	inp "kugo/input"
 )
 
-func RunMainMenu(chanErr chan error) (int, error) {
+func GetPlayerName() (string, error) {
+	var name []rune
+	//var cursorPosition int
+
+	fmt.Print("\033[?25h")
+	defer fmt.Print("\033[?25l")
+
+	fmt.Print("\033[2J\033[1;1H")
+	fmt.Print("Enter your name: ")
+
+	buf := make([]byte, 1)
+	for {
+		_, err := os.Stdin.Read(buf)
+		if err != nil {
+			return "", err
+		}
+
+		switch buf[0] {
+		case '\r', '\n':
+			if len(name) > 0 {
+				return string(name), nil
+			}
+			return "Player", nil // Fallback for empty name
+		case 127, '\b':
+			if len(name) > 0 {
+				name = name[:len(name)-1]
+				fmt.Print("\b \b")
+			}
+		case 27: // skip escape sequences for now
+			os.Stdin.Read(buf) // consumes '['
+			os.Stdin.Read(buf) // consumes the rest
+		default:
+			if buf[0] >= 32 && buf[0] < 127 {
+				name = append(name, rune(buf[0]))
+				fmt.Printf("%c", buf[0])
+			}
+		}
+	}
+}
+
+func RunMainMenu(chanErr chan error) (int, string, error) {
 	menuChan := make(chan rune)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -63,22 +104,26 @@ func RunMainMenu(chanErr chan error) (int, error) {
 				confirmed = true
 			}
 		case err := <- chanErr:
-			return 0, err
+			return 0, "", err
 		}
 	}
-	return selection + 3, nil
+	userName, err := GetPlayerName()
+	if err != nil {
+		return 0, "", err
+	}
+	return selection + 3, userName, nil
 }
 
 func GameLoop() error {
 	// Run the main menu to get number of players
 	var chanErr = make(chan error)
-	numPlayers, err := RunMainMenu(chanErr)
+	numPlayers, userName, err := RunMainMenu(chanErr)
 	if err != nil {
 		return err
 	}
 
 	var players []*game.Player
-	var playerNames = []string{"Human"}
+	var playerNames = []string{userName}
 
 	// Get player names
 	for _, name := range game.BOT_NAMES {
