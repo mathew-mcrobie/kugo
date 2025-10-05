@@ -30,10 +30,10 @@ type InputHandler struct {
 	phase         game.Phase
 	action        game.Action
 	rng           *rand.Rand
-	allPlayers	  []*game.Player
+	allPlayers    []*game.Player
 	activePlayers []*game.Player
 	validTargets  []*game.Player
-	target		  *game.Player
+	target        *game.Player
 	blockType     game.Card
 	PlayerChans   [6]chan rune
 	chanErr       chan error
@@ -306,6 +306,7 @@ func (ih *InputHandler) CreateBotInputStream(ctx context.Context, outChan chan<-
 				return
 			}
 		}
+
 		time.Sleep(time.Duration(500) * time.Millisecond)
 		switch ih.phase {
 		case game.SelectAction:
@@ -316,7 +317,7 @@ func (ih *InputHandler) CreateBotInputStream(ctx context.Context, outChan chan<-
 			// No need for the bots to cancel their target selections, so need
 			// to add one to the final result.
 			if len(ih.validTargets) == 0 {
-				retryCounter ++
+				retryCounter++
 				time.Sleep(time.Duration(100) * time.Millisecond)
 				continue
 			}

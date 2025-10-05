@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-
 	dis "kugo/display"
 	"kugo/game"
 	inp "kugo/input"
@@ -96,14 +95,14 @@ func RunMainMenu(chanErr chan error) (int, string, error) {
 
 	for !confirmed {
 		select {
-		case r := <- menuChan:
+		case r := <-menuChan:
 			switch r {
 			case '3', '4', '5', '6':
 				selection = int(r - '3') // so it fits 0-3
 			case '\r', '\n':
 				confirmed = true
 			}
-		case err := <- chanErr:
+		case err := <-chanErr:
 			return 0, "", err
 		}
 	}
