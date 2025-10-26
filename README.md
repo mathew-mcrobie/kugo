@@ -10,11 +10,13 @@ Edit: prototype now available. Download and run witn `go run main.go` to give it
 
 ## Installation
 
-Just clone this repo and use the go installer to run the prototype.
+Just clone this repo and use the Go compiler to run the prototype.
 ```bash
 git clone https://github.com/mathew-mcrobie/kugo.git
 go run main.go
 ```
+
+Full information on downloading and using the Go compiler can be found on the [official Go website](https://go.dev/)
 
 ## Roadmap
 
